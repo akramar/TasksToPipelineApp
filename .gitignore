@@ -14,5 +14,4 @@ premailer/
 requests/
 uritemplate/
 
-assets/css/style-old.css
 taskstopipeline/settings.py
