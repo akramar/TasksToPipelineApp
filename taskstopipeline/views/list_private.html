@@ -1,0 +1,273 @@
+{% extends "list_base.html" %}
+
+{% block title %} Editing - {{ selected_task_list.title }} {% endblock %}
+
+{% block head %}
+
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet" type='text/css'>
+    <link href="/assets/css/spectrum.css" rel="stylesheet" type='text/css' />
+    <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/themes/smoothness/jquery-ui.css" />
+
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.0/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="/assets/script/spectrum.js"></script>
+
+
+    <script type="text/javascript">
+        var currentListId = '{{ selected_task_list.id }}';
+        var userIdEncoded = '{{ user_id_encoded }}';
+        var shareKey = '{{ selected_task_list.share_key }}';
+
+        $(document).ready(function() {
+            $("#GetKeyBtn").click(function(){ GenerateShareKey(); })
+            $("#UnshareLink").click(function() { $("#UnshareLink").hide(); $("#UnshareLinkConfirm").show();  })
+            $("#UnshareLinkConfirm span:nth-child(1)")
+                    .click(function(){ $("#UnshareLinkConfirm").hide(); DeleteShareKey(); })
+            $("#UnshareLinkConfirm span:nth-child(2)")
+                    .click(function(){ $("#UnshareLinkConfirm").hide(); $("#UnshareLink").show();})
+            //$("#ShareLinkTB").focus(function(){ this.select(); });
+            if (shareKey != ''){ SetShareLink(shareKey); }
+            $(".settings-save-btn").click(function(){ UpdateSettings(this); })
+            $(".options-opener").click(function(){ OpenSettingsWrapper(this); })
+
+            $(".setting-color").spectrum({
+                showInput: true,
+                preferredFormat: "hex",
+                showPaletteOnly: true,
+                hideAfterPaletteSelect:true,
+                palette: [
+                    ["#000","#444","#666","#999","#ccc","#eee","#f3f3f3","#fff"],
+                    ["#f00","#f90","#ff0","#0f0","#0ff","#00f","#90f","#f0f"],
+                    ["#f4cccc","#fce5cd","#fff2cc","#d9ead3","#d0e0e3","#cfe2f3","#d9d2e9","#ead1dc"],
+                    ["#ea9999","#f9cb9c","#ffe599","#b6d7a8","#a2c4c9","#9fc5e8","#b4a7d6","#d5a6bd"],
+                    ["#e06666","#f6b26b","#ffd966","#93c47d","#76a5af","#6fa8dc","#8e7cc3","#c27ba0"],
+                    ["#c00","#e69138","#f1c232","#6aa84f","#45818e","#3d85c6","#674ea7","#a64d79"],
+                    ["#900","#b45f06","#bf9000","#38761d","#134f5c","#0b5394","#351c75","#741b47"],
+                    ["#600","#783f04","#7f6000","#274e13","#0c343d","#073763","#20124d","#4c1130"],
+                    ["#89b8d6","#39b54a","#e51f1f"]
+                ],
+                change: function(color) { //TODO: move to own function
+                    //console.log($(this).parent());
+                    var settingsWrapper = $(this).parentsUntil('.settings-wrapper').last().parent();
+                    console.log(settingsWrapper);
+                    //$("#basic-log").text("change called: " + color.toHexString());
+                    $($(settingsWrapper).find('.setting-color')[0]).val(color.toHexString());
+                }
+            });
+        });
+
+        function SelectedListChanged(){
+          var listSelect = document.getElementById("TaskListDropdown");
+          var selectedId = listSelect.options[listSelect.selectedIndex].value;
+          window.location.href = 'http://' + window.location.host + '/list/' + selectedId;
+        }
+
+        // /share/create?req_list={listid}&user_id={encryptedandencodedid}
+        function GenerateShareKey(){
+            $("#GetKeyBtn").hide();
+            $("#ShareLinkTB").show();
+            $("#ShareLinkTB").attr("placeholder", "Generating...");
+
+            $.ajax({
+                url: '/share/create',
+                type: "GET",
+                data:{
+                    req_list: currentListId,
+                    user_id: userIdEncoded,
+                    req_task: "",
+                    key: "",
+                    val: ""
+                },
+                async: true,
+                cache: false,
+                success: function(data) {
+                    console.log(data)
+                    var shareData = $.parseJSON( data );
+                    shareKey = shareData.share_key;
+                    SetShareLink(shareKey)
+                }
+            });
+        }
+
+        function SetShareLink(shareKey){
+            var shareUrl = 'http://' + window.location.host + '/share/'
+            $("#GetKeyBtn").hide();
+            $("#UnshareLink").show();
+            $("#ShareLinkTB").show();
+            $("#ShareLinkTB").val(shareUrl + shareKey);
+        }
+
+        //function ConfirmDeleteShareKey(){
+         //   $.("#UnshareLink").val("")
+        //}
+
+        function DeleteShareKey(){
+            console.log("deleting shares for list id " + currentListId)
+            //var shareUrl = 'http://' + window.location.host + '/share/'
+
+            $.ajax({
+                url: '/share/delete',
+                type: "GET",
+                data:{
+                    list_id: currentListId,
+                    user_id: userIdEncoded
+                },
+                async: true,
+                cache: false,
+                success: function(data) {
+                    console.log(data)
+                    var resultData = $.parseJSON( data );
+                    var resultMessage = resultData.result_message;
+                    $("#GetKeyBtn").show();
+                    $("#ShareLinkTB").hide();
+                    $("#ShareLinkTB").val("");
+                }
+            });
+        }
+
+        function OpenSettingsWrapper(clickedLink) {
+            console.log(clickedLink);
+            var settingsWrapper = $(clickedLink).next();
+            console.log(settingsWrapper);
+
+            $(".settings-wrapper").not($(settingsWrapper)).slideUp( "fast", function() { });
+            settingsWrapper.slideToggle();
+        }
+
+        function UpdateSettings(sendingBtn){
+            $(sendingBtn).addClass('fake-link-disabled');
+            $(sendingBtn).text("Saving...");
+            var settingsWrapper = $(sendingBtn).parent();
+            console.log(settingsWrapper);
+            var taskId = $($(settingsWrapper).find("input.task-id")[0]).val();
+            var isHidden = $($(settingsWrapper).find(".setting-hidden")[0]).is(':checked');
+            var color = $($(settingsWrapper).find(".setting-color")[0]).val();
+            var showArrow = $($(settingsWrapper).find(".setting-arrow")[0]).is(':checked');
+            var sortBy = $($(settingsWrapper).find(".setting-sort")[0]).val();
+
+            //$( "#myselect option:selected" ).text();
+
+            //var listSelect = document.getElementById("TaskListDropdown");
+            //var selectedId = listSelect.options[listSelect.selectedIndex].value;
+            //setting-sort
+
+
+            var settingsJson =  {
+                "list_id" : currentListId,
+                "user_id" : userIdEncoded,
+                "task_id" : taskId,
+                "is_hidden" : isHidden,
+                "color" : color,
+                "show_arrow" : showArrow,
+                "sort" : sortBy
+            }
+
+            $.ajax({
+            url: '/settings/task',
+            type: "POST",
+            data: JSON.stringify(settingsJson),
+            dataType: "json",
+            async: true,
+            cache: false,
+            success: function(data) {
+                    console.log(data)
+                    //var resultData = $.parseJSON(data);
+                    //var resultMessage = resultData.setting_result;
+                    window.location.href = 'http://' + window.location.host + '/list/' + currentListId;
+                }
+            });
+        }
+
+
+    </script>
+
+{% endblock %}
+
+{% block authbox %}
+    {% if groups_to_show|length == 0 %}
+      <!-- Authorization box -->
+      <div>
+      {% if authorize_url %}
+        <a class="title" title="Grant read access to your tasks" href="{{ authorize_url }}">Grant Access</a>
+      {% else %}
+        <a class="title" title="Add more tasks in Gmail" href="http://mail.google.com/">Add More Tasks</a>
+      {% endif %}
+      </div>
+    {% endif %}
+{% endblock %}
+
+{% block subheader %}
+    <!-- Task Lists dropdown -->
+    <div>
+        <select id="TaskListDropdown" onchange="SelectedListChanged()">
+        {% for tl in task_lists %}
+        <option value="{{ tl.id }}" {% if tl.id == selected_task_list.id %} selected {% endif %}>{{ tl.title }}</option>
+        {% endfor %}
+        </select>
+    </div>
+
+
+    <div style="float: right"><span>Share Link:</span>
+        <input id="GetKeyBtn" type="button" value="Get Key" />
+        <input id="ShareLinkTB" type="text" style="width: 310px; display: none;" readonly />
+        <div id="UnshareLink" class="fake-link" style="display: none">Unshare</div>
+        <div id="UnshareLinkConfirm" style="display: none">
+            <span class="fake-link">Yes</span> / <span class="fake-link">No</span></div>
+    </div>
+
+{% endblock %}
+
+{% block items_group_footer %}
+
+    <span class="fake-link options-opener">
+        <i class="fa fa-plus-square-o"></i> Options</span>
+    <div id="SettingsWrapper_{{ task_group.id }}" class="settings-wrapper" style="display: none; " >
+        <input type="hidden" value="{{ task_group.id }}" class="task-id" />
+
+        <table>
+            <tr>
+                <td><label for="Settings_{{ task_group.id }}_hiddenCB" >Hidden: </label></td>
+                <td><input type="checkbox" class="setting-hidden" id="Settings_{{ task_group.id }}_hiddenCB"  /></td>
+            </tr>
+            <tr>
+                <td><span>Color:</span></td>
+                <td><input type="text" class="setting-color" value="{{ background_color }}" /></td>
+            </tr>
+            <tr>
+                <td><label for="Settings_{{ task_group.id }}_arrowCB" >Arrow: </label></td>
+
+                {% set show_arrow = True %}
+                {% if 'arrow' in task_group.settings %}{% set show_arrow = task_group.settings['arrow'] %}{% endif %}
+
+                <td><input type="checkbox" class="setting-arrow" id="Settings_{{ task_group.id }}_arrowCB" {% if show_arrow %} checked {% endif %}/></td>
+            </tr>
+            <tr>
+                <td><span>Sort:</span></td>
+
+                {% set sort_type = 'none' %}
+                {% if 'sort' in task_group.settings %}{% set sort_type = task_group.settings['sort'] %}{% endif %}
+
+                <td>
+                    <select class="setting-sort" >
+                        <option value="none" {% if sort_type == "none" %} selected {% endif %}>None</option>
+                        <option value="alpha" {% if sort_type == "alpha" %} selected {% endif %}>Alphabetical</option>
+                    </select>
+                </td>
+            </tr>
+        </table>
+
+        <span class="fake-link settings-save-btn">Save</span>
+
+    </div>
+
+
+{% endblock %}
+
+{% block pre_body_footer %}
+
+    {% if page_is_email is not defined or page_is_email == False %}
+        {% include 'includes/modals.html' %}
+    {% endif %}
+
+{% endblock %}
+

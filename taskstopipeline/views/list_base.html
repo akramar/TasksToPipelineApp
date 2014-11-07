@@ -1,0 +1,129 @@
+<!doctype html>
+<html>
+  <head>
+    <title>TasksToPipeline - {% block title %}{% endblock %}</title>
+    {% include 'includes/minimum_head.html' %}
+
+    {% block head %}
+
+    {% endblock %}
+
+
+  </head>
+  <body>
+
+  <div id="ContentWrapper">
+
+    {% block authbox %}
+
+    {% endblock %}
+
+    <!-- Task groups -->
+    <div id="HeaderWrapper">
+
+        <div>
+            <div id="TaskListTitleWrapper" >
+                <h1>{{ selected_task_list.title }}</h1>
+            </div>
+        </div>
+
+        <div id="SubHeaderWrapper">
+
+            {% block subheader %}
+
+            {% endblock %}
+
+            {% if share_url is defined and is_share == True  %}
+                <div style="float: right">
+                    {% if page_is_email == True %}
+                        <a href="{{ share_url }}">View Online</a>
+                    {% else %}
+                        <span>Share Link:</span>
+                        <input id="ShareLinkTB" type="text" readonly value="{{ share_url }}" />
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            {% if page_is_email is not defined or page_is_email == False %}
+                <div style="float: right"><span id="Send-Page-Link" class="fake-link">Email Page</span></div>
+            {% endif %}
+
+        </div>
+    </div>
+
+    <div class="groups-row-box">
+
+    {% for task_group in groups_to_show %}
+
+        {% if 'new_row' in task_group.settings %}
+            </div>
+            <!-- New group row -->
+            <div class="groups-row-box">
+        {% endif %}
+
+        {% set background_color = '#89b8d6' %}
+        {% if 'color' in task_group.settings %}{% set background_color = task_group.settings["color"] %}{% endif %}
+
+        {% set arrow_class = "" %}
+        {% if 'arrow' not in task_group.settings or ('arrow' in task_group.settings and task_group.settings['arrow'] != False) %}
+            {% set arrow_class = "arrow-box" %}
+        {% endif %}
+
+
+        <div class="group-box {{ arrow_class }}" style='background:{{ background_color }};border-top-color:{{ background_color }};border-left-color:{{ background_color }}' >
+            <h4>{{ task_group.title }}</h4>
+
+            {% if page_is_email == True and ('arrow' not in task_group.settings or ('arrow' in task_group.settings and task_group.settings['arrow'] != False)) %}
+                <div class="emailer-arrow" style="color: {{ background_color }};">&#10151;</div>
+            {% endif %}
+
+            <div class="items-wrapper">
+                <ul>
+                    {% for ti in task_group.task_items %}
+                        {% if ti.text == "" %}
+                            <li><span class="task-title">{{ ti.title }}</span></li>
+                        {% else %}
+                            <li><span class="task-title">{{ ti.title }}</span> - {{ ti.text }}</li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+
+                {% block items_group_footer scoped %}
+
+                {% endblock %}
+
+
+
+            </div>
+
+        </div>
+
+    {% endfor %}
+
+
+    </div>
+  </div>
+
+  <div id="FooterWrapper">
+      <hr />
+      <span>TasksToPipeline by Coaha LLC</span>
+      <br/>
+      {% if page_is_email == True %}
+        <a href="mailto:admin@taskstopipeline.com" >admin@taskstopipeline.com</a>
+      {% else %}
+        <span>admin<span class="emailObstruction">+spammy</span>@taskstopipeline.com</span>
+      {% endif %}
+  </div>
+
+    {% block pre_body_footer %}
+
+    {% endblock %}
+
+
+
+
+  </body>
+
+
+
+

@@ -1,0 +1,61 @@
+<script type="text/javascript">
+
+    $(document).ready(function() {
+
+        $("#Send-Page-Link").click(function(){
+            $( "#Dialog-Email" ).dialog({
+                draggable: false,
+                modal: true,
+                buttons: {
+                    Send: function() {
+                        //$( this ).dialog( "close" );
+                       // console.log(this);
+                       // $( this ).prop("disabled",true);
+                        //$( this + " .ui-button-text").text("Sending...");
+
+                        SendEmail(this);
+                    }
+                }
+            });
+        });
+
+        //$("#Send-Email-Link").click(function(){
+        function SendEmail(callingDialogWindow) {
+            var destAddr = $("#Send-Email-Email").val();
+            var subj = $("#Send-Email-Subject").val();
+
+            $.ajax({
+                url: '/emailer/send',
+                type: "POST",
+                data:{
+                    req_list: currentListId,
+                    user_id: userIdEncoded,
+                    email_dest: destAddr,
+                    email_subj: subj
+                },
+                async: true,
+                cache: false,
+                success: function(data) {
+                    console.log(data)
+                    $(callingDialogWindow).dialog( "close" );
+                    //var returnData = $.parseJSON( data );
+                }
+            });
+        };
+    });
+</script>
+
+<div id="Dialog-Email" style="display: none" title="Email Page">
+  <p>
+    <span class="ui-icon ui-icon-circle-check" style="float:left; margin:0 7px 50px 0;"></span>
+
+      <label>Email</label><br/>
+      <input id="Send-Email-Email" />
+      <br/>
+      <label>Subject</label><br/>
+      <input id="Send-Email-Subject" />
+      <br/>
+      <!-- <span id="Send-Email-Link" class="fake-link">Send</span> -->
+
+  </p>
+</div>

@@ -1,0 +1,11 @@
+.emailer-arrow {
+    font-size: 69pt;
+    margin-left: 258px;
+    position: absolute;
+    border-radius: 15px;
+    line-height: 11pt;
+}
+
+.group-box > div.items-wrapper { margin-top: -18px; }
+
+#HeaderWrapper { max-width: 100%; margin: 0px auto; }
