@@ -6,6 +6,7 @@ body {
 #ContentWrapper { margin:0px auto; padding: 0px 10px; }
 #HeaderWrapper { max-width: 90%; margin: 0px auto; }
 #SubHeaderWrapper {
+    padding-top: 15px;
     max-height: 26px; }
 #SubHeaderWrapper > div:first-child { float: right; margin-left: 10px }
 #TaskListTitleWrapper {

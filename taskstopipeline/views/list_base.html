@@ -33,21 +33,6 @@
 
             {% endblock %}
 
-            {% if share_url is defined and is_share == True  %}
-                <div style="float: right">
-                    {% if page_is_email == True %}
-                        <a href="{{ share_url }}">View Online</a>
-                    {% else %}
-                        <span>Share Link:</span>
-                        <input id="ShareLinkTB" type="text" readonly value="{{ share_url }}" />
-                    {% endif %}
-                </div>
-            {% endif %}
-
-            {% if page_is_email is not defined or page_is_email == False %}
-                <div style="float: right"><span id="Send-Page-Link" class="fake-link">Email Page</span></div>
-            {% endif %}
-
         </div>
     </div>
 

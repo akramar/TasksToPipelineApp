@@ -44,7 +44,7 @@ class EmailerHandler(BaseHandler):
 
         env = Environment(loader=PackageLoader('taskstopipeline', 'views'))
         #  view = env.get_template('index5.html')
-        view = env.get_template('list_share.html')
+        view = env.get_template('list_email.html')
         view_rendered = view.render(vm.template_values)
 
         external_style_links = ['/assets/css/style-email.css']

@@ -12,6 +12,17 @@
 
 {% block subheader %}
 
+    {% if share_url is defined %}
+        <div style="float: right">
+                <span>Share Link:</span>
+                <input id="ShareLinkTB" type="text" readonly value="{{ share_url }}" />
+        </div>
+
+        <div style="float: right">
+            <span style="display: block; margin-right: 10px;" id="Send-Page-Link" class="fake-link">Email Page</span>
+        </div>
+    {% endif %}
+
 {% endblock %}
 
 {% block items_group_footer %}
