@@ -56,11 +56,11 @@ class EmailerHandler(BaseHandler):
 
         #logging.info(view_styled)
 
-        message = mail.EmailMessage(sender="akramar@coahadesign.com",
-                                    subject=email_subj)  # "test outgoing")
+        message = mail.EmailMessage(sender="administrator@coahadesign.com",
+                                    subject=email_subj)
 
-        #if to contains ;, then split
-        message.to = email_dest  # "alain.kramar@gmail.com"
+        #TODO: if 'to' contains ;, then split
+        message.to = email_dest
         message.body = view_styled
         message.html = view_styled
         message.send()
