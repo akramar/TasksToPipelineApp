@@ -4,12 +4,11 @@
 
 {% block head %}
 
-    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet" type='text/css'>
-    <link href="/assets/css/spectrum.css" rel="stylesheet" type='text/css' />
-    <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/themes/smoothness/jquery-ui.css" />
 
-    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.0/jquery-ui.min.js"></script>
+    <link href="/assets/css/spectrum.css" rel="stylesheet" type='text/css' />
+
+
+
     <script type="text/javascript" src="/assets/script/spectrum.js"></script>
 
 
@@ -269,9 +268,7 @@
 
 {% block pre_body_footer %}
 
-    {% if page_is_email is not defined or page_is_email == False %}
-        {% include 'includes/modals.html' %}
-    {% endif %}
+    {% include 'includes/modal-email.html' %}
 
 {% endblock %}
 
